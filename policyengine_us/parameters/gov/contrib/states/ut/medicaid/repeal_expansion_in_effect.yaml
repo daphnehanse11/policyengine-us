@@ -1,0 +1,12 @@
+description: Utah HB 15 (2026) repeals Medicaid expansion if federal matching falls below 85%.
+
+values:
+  0000-01-01: false
+
+metadata:
+  unit: bool
+  period: year
+  label: Utah Medicaid expansion repeal in effect
+  reference:
+    - title: Utah HB 15 (2026) - Medicaid Expansion Amendments
+      href: https://le.utah.gov/~2026/bills/static/HB0015.html

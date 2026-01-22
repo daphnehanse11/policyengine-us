@@ -1,0 +1,71 @@
+# Utah HB 15 (2026) - Medicaid Expansion Repeal
+# This reform sets the adult Medicaid income limit to -inf,
+# effectively removing expansion Medicaid eligibility for adults in Utah.
+
+- name: Without reform - Low income adult in UT qualifies for expansion Medicaid
+  period: 2027
+  input:
+    people:
+      person1:
+        age: 35
+        employment_income: 15_000
+        is_medicaid_eligible: true
+    tax_units:
+      tax_unit:
+        members: [person1]
+    spm_units:
+      spm_unit:
+        members: [person1]
+    households:
+      household:
+        members: [person1]
+        state_code: UT
+  output:
+    is_adult_for_medicaid: true
+
+- name: With reform - Low income adult in UT no longer qualifies for expansion Medicaid
+  period: 2027
+  reforms: policyengine_us.reforms.states.ut.medicaid.repeal_ut_medicaid_expansion.repeal_ut_medicaid_expansion
+  input:
+    gov.contrib.states.ut.medicaid.repeal_expansion_in_effect: true
+    people:
+      person1:
+        age: 35
+        employment_income: 15_000
+        is_medicaid_eligible: true
+    tax_units:
+      tax_unit:
+        members: [person1]
+    spm_units:
+      spm_unit:
+        members: [person1]
+    households:
+      household:
+        members: [person1]
+        state_code: UT
+  output:
+    is_adult_for_medicaid: false
+
+- name: With reform - Child in UT still qualifies for Medicaid (not affected by adult expansion repeal)
+  period: 2027
+  reforms: policyengine_us.reforms.states.ut.medicaid.repeal_ut_medicaid_expansion.repeal_ut_medicaid_expansion
+  input:
+    gov.contrib.states.ut.medicaid.repeal_expansion_in_effect: true
+    people:
+      parent:
+        age: 35
+        employment_income: 25_000
+      child:
+        age: 8
+    tax_units:
+      tax_unit:
+        members: [parent, child]
+    spm_units:
+      spm_unit:
+        members: [parent, child]
+    households:
+      household:
+        members: [parent, child]
+        state_code: UT
+  output:
+    is_older_child_for_medicaid: [false, true]
