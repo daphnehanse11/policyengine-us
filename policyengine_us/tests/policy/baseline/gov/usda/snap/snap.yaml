@@ -190,3 +190,136 @@
     snap_earned_income: 500
     snap_gross_income: 500
     snap: 230.40
+
+- name: Case 7, mixed household — failing ABAWD is removed from the unit, remaining member gets a nonzero benefit.
+  period: 2026-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age:
+          2026: 35
+        weekly_hours_worked_before_lsr:
+          2026: 30
+        is_disabled: false
+      person2:
+        age:
+          2026: 30
+        weekly_hours_worked_before_lsr:
+          2026: 0
+        is_disabled: false
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    tax_units:
+      tax_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
+  output:
+    meets_snap_work_requirements_person: [true, false]
+    is_snap_eligible: true
+    snap_unit_size: 1
+    snap_max_allotment: 298
+    snap: 298
+
+- name: Case 8, unemployed non-exempt adult with a 10-year-old dependent — household fully eligible.
+  period: 2026-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age:
+          2026: 30
+        weekly_hours_worked_before_lsr:
+          2026: 0
+        is_disabled: false
+      person2:
+        age:
+          2026: 10
+        is_tax_unit_dependent: true
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+        # Zero out TANF to isolate the SNAP calculation.
+        tanf: 0
+    tax_units:
+      tax_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
+  output:
+    meets_snap_work_requirements_person: [true, true]
+    is_snap_eligible: true
+    snap_unit_size: 2
+    snap_max_allotment: 546
+    snap: 546
+
+- name: Case 9, all-ABAWD household where all members fail — ineligible with zero benefit.
+  period: 2026-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age:
+          2026: 35
+        weekly_hours_worked_before_lsr:
+          2026: 0
+        is_disabled: false
+      person2:
+        age:
+          2026: 30
+        weekly_hours_worked_before_lsr:
+          2026: 0
+        is_disabled: false
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    tax_units:
+      tax_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
+  output:
+    meets_snap_work_requirements_person: [false, false]
+    is_snap_eligible: false
+    snap_unit_size: 0
+    snap: 0
+
+- name: Case 10, pre-HR1 non-dependent under-18 member exempts the unemployed adult — 7 CFR 273.24(c)(4).
+  period: 2024-01
+  absolute_error_margin: 0.01
+  input:
+    people:
+      person1:
+        age:
+          2024: 30
+        weekly_hours_worked_before_lsr:
+          2024: 0
+        is_disabled: false
+      person2:
+        age:
+          2024: 17
+        is_tax_unit_dependent: false
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    tax_units:
+      tax_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
+  output:
+    meets_snap_work_requirements_person: [true, true]
+    is_snap_eligible: true
+    snap_unit_size: 2
+    snap_max_allotment: 535
+    snap: 535

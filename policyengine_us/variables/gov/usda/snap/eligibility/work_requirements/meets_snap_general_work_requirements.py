@@ -5,31 +5,27 @@ class meets_snap_general_work_requirements(Variable):
     value_type = bool
     entity = Person
     label = "Person is eligible for SNAP benefits via general work requirements"
+    documentation = (
+        "Whether the person complies with the SNAP general work "
+        "requirements of 7 CFR 273.7. The general requirement obligates "
+        "non-exempt persons to register for work and accept suitable "
+        "employment; working fewer than 30 hours per week is not itself "
+        "disqualifying - 30+ hours of work is exemption 273.7(b)(1)(vii) "
+        "from registration, not a compliance test. Disqualification "
+        "requires an affirmative noncompliance event: refusing suitable "
+        "employment or E&T noncompliance (273.7(f)), or voluntarily "
+        "quitting or reducing work effort (273.7(j)). These events are "
+        "not observable in survey data, so the baseline assumes "
+        "registration compliance and this variable defaults to true for "
+        "everyone. It is retained as a hook for modeling work-requirement "
+        "sanctions: set it to false for a person to disqualify that "
+        "individual, which removes them from the SNAP unit per 7 CFR "
+        "273.11(c) rather than making the household ineligible."
+    )
+    default_value = True
     definition_period = MONTH
-    reference = "https://www.law.cornell.edu/cfr/text/7/273.7"
-
-    def formula(person, period, parameters):
-        p = parameters(period).gov.usda.snap.work_requirements.general
-        age = person("monthly_age", period)
-        weekly_hours_worked = person("weekly_hours_worked_before_lsr", period.this_year)
-        # Under 16 or 60 years of age or older are exempted
-        worked_exempted_age = p.age_threshold.exempted.calc(age)
-        # Unable to work due to a physical or mental limitation
-        is_disabled = person("is_disabled", period)
-        # Taking care of a child under six or an incapacitated person
-        is_dependent = person("is_tax_unit_dependent", period)
-        is_child = age < p.age_threshold.caring_dependent_child
-        has_child = person.spm_unit.any(is_dependent & is_child)
-        has_incapacitated_person = person.spm_unit.any(
-            person("is_incapable_of_self_care", period)
-        )
-        # Work at least 30 hours a week
-        is_working = weekly_hours_worked >= p.weekly_hours_threshold
-
-        return (
-            worked_exempted_age
-            | is_disabled
-            | has_child
-            | has_incapacitated_person
-            | is_working
-        )
+    reference = (
+        "https://www.law.cornell.edu/cfr/text/7/273.7#f",
+        "https://www.law.cornell.edu/cfr/text/7/273.7#j",
+        "https://www.law.cornell.edu/uscode/text/7/2015#d_1",
+    )

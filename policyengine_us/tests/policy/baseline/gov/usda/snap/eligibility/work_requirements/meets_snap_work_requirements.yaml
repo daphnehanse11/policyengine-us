@@ -1,41 +1,104 @@
-- name: Case 1, has dependent child, meets both work requirements.
-  period: 2022
-  input:
-    meets_snap_general_work_requirements: true
-    meets_snap_abawd_work_requirements: true
-    monthly_age: 17
-    is_tax_unit_dependent: true
-  output: 
-    meets_snap_work_requirements: true
+# Work requirement ineligibility attaches to the individual — 7 U.S.C.
+# 2015(d)(1)(A) and (o)(2); 7 CFR 273.24(b)(1). The disqualified member
+# is removed from the SNAP unit per 7 CFR 273.11(c), and the unit as a
+# whole is ineligible only when no members remain eligible.
 
-- name: Case 2, has dependent child, meets the general work requirements.
-  period: 2022
+- name: Case 1, single ABAWD failing the work requirement makes a one-person unit ineligible.
+  period: 2026-01
   input:
-    meets_snap_general_work_requirements: true
-    meets_snap_abawd_work_requirements: false
-    monthly_age: 17
-    is_tax_unit_dependent: true
-  output: 
-    meets_snap_work_requirements: true
-
-- name: Case 3, no dependent child, meets only one work requirements.
-  period: 2022
-  input:
-    meets_snap_general_work_requirements: false
-    meets_snap_abawd_work_requirements: true
-    monthly_age: 18
-    is_tax_unit_dependent: false
-  output: 
+    people:
+      person1:
+        age: 30
+        weekly_hours_worked_before_lsr: 0
+        is_disabled: false
+    spm_units:
+      spm_unit:
+        members: [person1]
+    tax_units:
+      tax_unit:
+        members: [person1]
+    households:
+      household:
+        members: [person1]
+        state_code: TX
+  output:
+    meets_snap_work_requirements_person: false
     meets_snap_work_requirements: false
 
-- name: Case 4, no dependent child, meets both work requirements.
-  period: 2022
+- name: Case 2, mixed unit — one compliant member keeps the unit eligible while the ABAWD is disqualified individually.
+  period: 2026-01
   input:
-    meets_snap_general_work_requirements: true
-    meets_snap_abawd_work_requirements: true
-    monthly_age: 18
-    is_tax_unit_dependent: false
+    people:
+      person1:
+        age: 35
+        weekly_hours_worked_before_lsr: 30
+        is_disabled: false
+      person2:
+        age: 30
+        weekly_hours_worked_before_lsr: 0
+        is_disabled: false
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    tax_units:
+      tax_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
   output:
+    meets_snap_work_requirements_person: [true, false]
+    meets_snap_work_requirements: true
+
+- name: Case 3, unemployed non-exempt adult with a 10-year-old dependent meets the work requirements.
+  period: 2026-01
+  input:
+    people:
+      person1:
+        age: 30
+        weekly_hours_worked_before_lsr: 0
+        is_disabled: false
+      person2:
+        age: 10
+        is_tax_unit_dependent: true
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    tax_units:
+      tax_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
+  output:
+    meets_snap_work_requirements_person: [true, true]
+    meets_snap_work_requirements: true
+
+- name: Case 4, pre-HR1 non-dependent under-18 member exempts the unemployed adult.
+  period: 2024-01
+  input:
+    people:
+      person1:
+        age: 30
+        weekly_hours_worked_before_lsr: 0
+        is_disabled: false
+      person2:
+        age: 17
+        is_tax_unit_dependent: false
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    tax_units:
+      tax_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
+  output:
+    meets_snap_work_requirements_person: [true, true]
     meets_snap_work_requirements: true
 
 - name: Case 5, CA pre-HR1 age 55 exempt flows through SPM.
@@ -46,7 +109,6 @@
         age: 55
         weekly_hours_worked_before_lsr: 1
         is_disabled: false
-        meets_snap_general_work_requirements: true
     spm_units:
       spm_unit:
         members: [person1]
@@ -68,7 +130,6 @@
         age: 55
         weekly_hours_worked_before_lsr: 1
         is_disabled: false
-        meets_snap_general_work_requirements: true
     spm_units:
       spm_unit:
         members: [person1]
@@ -82,62 +143,55 @@
   output:
     meets_snap_work_requirements: false
 
-- name: Case 7, two adults remain eligible when one adult passes.
+- name: Case 7, sanctioned member (general work requirement hook set to false) is disqualified individually.
   period: 2024-01
   input:
     people:
       person1:
-        monthly_age: 35
-        is_tax_unit_dependent: false
-        meets_snap_general_work_requirements: true
-        meets_snap_abawd_work_requirements: true
+        age: 35
+        weekly_hours_worked_before_lsr: 30
+        is_disabled: false
       person2:
-        monthly_age: 30
-        is_tax_unit_dependent: false
+        age: 30
+        weekly_hours_worked_before_lsr: 30
+        is_disabled: false
         meets_snap_general_work_requirements: false
-        meets_snap_abawd_work_requirements: false
     spm_units:
       spm_unit:
         members: [person1, person2]
+    tax_units:
+      tax_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
   output:
+    meets_snap_work_requirements_person: [true, false]
     meets_snap_work_requirements: true
 
-- name: Case 8, two adults are ineligible when both adults fail.
-  period: 2024-01
+- name: Case 8, unit is ineligible when all members fail the work requirements.
+  period: 2026-01
   input:
     people:
       person1:
-        monthly_age: 35
-        is_tax_unit_dependent: false
-        meets_snap_general_work_requirements: false
-        meets_snap_abawd_work_requirements: false
+        age: 35
+        weekly_hours_worked_before_lsr: 0
+        is_disabled: false
       person2:
-        monthly_age: 30
-        is_tax_unit_dependent: false
-        meets_snap_general_work_requirements: false
-        meets_snap_abawd_work_requirements: false
+        age: 30
+        weekly_hours_worked_before_lsr: 0
+        is_disabled: false
     spm_units:
       spm_unit:
         members: [person1, person2]
+    tax_units:
+      tax_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
   output:
+    meets_snap_work_requirements_person: [false, false]
     meets_snap_work_requirements: false
-
-- name: Case 9, two adults remain eligible when both adults pass.
-  period: 2024-01
-  input:
-    people:
-      person1:
-        monthly_age: 35
-        is_tax_unit_dependent: false
-        meets_snap_general_work_requirements: true
-        meets_snap_abawd_work_requirements: true
-      person2:
-        monthly_age: 30
-        is_tax_unit_dependent: false
-        meets_snap_general_work_requirements: true
-        meets_snap_abawd_work_requirements: true
-    spm_units:
-      spm_unit:
-        members: [person1, person2]
-  output:
-    meets_snap_work_requirements: true

@@ -1,0 +1,1 @@
+Apply SNAP work requirement ineligibility to individuals rather than households: failing members are removed from the SNAP unit per 7 CFR 273.11(c), the general work requirement assumes registration compliance in baseline per 7 CFR 273.7, and the ABAWD dependent-child exception keys on any household member under 18 pre-HR1 per 7 CFR 273.24(c)(3)-(c)(4).

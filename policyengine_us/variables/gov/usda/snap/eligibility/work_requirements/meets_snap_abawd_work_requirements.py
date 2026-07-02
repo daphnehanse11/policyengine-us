@@ -28,17 +28,11 @@ class meets_snap_abawd_work_requirements(Variable):
         is_working = weekly_hours_worked >= p.weekly_hours_threshold
         # (B) Disability — 7 U.S.C. 2015(o)(3)(B)
         is_disabled = person("is_disabled", period)
-        # (C) Parent with qualifying child — 7 U.S.C. 2015(o)(3)(C)
-        is_dependent = person("is_tax_unit_dependent", period)
-        dep_threshold = where(
-            hr1_in_effect,
-            p.age_threshold.dependent,
-            p_pre.age_threshold.dependent,
-        )
-        is_qualifying_child = age < dep_threshold
-        is_parent = person("is_parent", period)
-        has_child = person.spm_unit.any(is_dependent & is_qualifying_child)
-        exempt_parent = is_parent & has_child
+        # (C) Parent or other member of a household with responsibility
+        # for a qualifying child — 7 U.S.C. 2015(o)(3)(C); pre-HR1,
+        # 7 CFR 273.24(c)(3)-(c)(4). Applied household-wide via
+        # snap_abawd_exempt_child_present in
+        # meets_snap_work_requirements_person, not here.
         # (D) Work registration exempt (non-age) — 7 U.S.C. 2015(o)(3)(D)
         work_reg_exempt = person("is_snap_work_registration_exempt_non_age", period)
         # (E) Pregnant — 7 U.S.C. 2015(o)(3)(E)
@@ -51,7 +45,6 @@ class meets_snap_abawd_work_requirements(Variable):
             is_working
             | working_age_exempt
             | is_disabled
-            | exempt_parent
             | work_reg_exempt
             | is_pregnant
         )

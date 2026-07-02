@@ -1,0 +1,118 @@
+# Single source of truth for the ABAWD dependent-child exception.
+# Pre-HR1: any household member under 18 exempts all members,
+# regardless of tax dependency — 7 CFR 273.24(c)(3)-(c)(4) ("even if
+# the household member who is under 18 is not himself eligible").
+# Post-HR1: dependent child under 14 — 7 U.S.C. 2015(o)(3)(C),
+# implemented household-wide.
+
+- name: Case 1, pre-HR1 non-dependent under-18 member triggers the exemption.
+  period: 2024-01
+  input:
+    people:
+      person1:
+        age: 30
+        is_tax_unit_dependent: false
+      person2:
+        age: 17
+        is_tax_unit_dependent: false
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+  output:
+    snap_abawd_exempt_child_present: true
+
+- name: Case 2, pre-HR1 all-adult unit has no exempting child.
+  period: 2024-01
+  input:
+    people:
+      person1:
+        age: 30
+      person2:
+        age: 35
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+  output:
+    snap_abawd_exempt_child_present: false
+
+- name: Case 3, post-HR1 dependent child under 14 triggers the exemption.
+  period: 2026-01
+  input:
+    people:
+      person1:
+        age: 30
+      person2:
+        age: 13
+        is_tax_unit_dependent: true
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
+  output:
+    snap_abawd_exempt_child_present: true
+
+- name: Case 4, post-HR1 dependent child age 15 does NOT trigger the exemption.
+  period: 2026-01
+  input:
+    people:
+      person1:
+        age: 30
+      person2:
+        age: 15
+        is_tax_unit_dependent: true
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
+  output:
+    snap_abawd_exempt_child_present: false
+
+- name: Case 5, post-HR1 non-dependent 13-year-old does NOT trigger the exemption.
+  period: 2026-01
+  input:
+    people:
+      person1:
+        age: 30
+      person2:
+        age: 13
+        is_tax_unit_dependent: false
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: TX
+  output:
+    snap_abawd_exempt_child_present: false
+
+- name: Case 6, CA pre-HR1 rules apply during delayed adoption — non-dependent 17-year-old triggers the exemption.
+  period: 2026-01
+  input:
+    people:
+      person1:
+        age: 30
+      person2:
+        age: 17
+        is_tax_unit_dependent: false
+    spm_units:
+      spm_unit:
+        members: [person1, person2]
+    households:
+      household:
+        members: [person1, person2]
+        state_code: CA
+  output:
+    snap_abawd_exempt_child_present: true

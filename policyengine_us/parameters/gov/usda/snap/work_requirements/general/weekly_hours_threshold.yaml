@@ -1,4 +1,4 @@
-description: The Department of Agriculture limits the Supplemental Nutrition Assistance Program to individuals working more than this number of weekly hours from the general work requirements.
+description: The Department of Agriculture exempts individuals working at least this number of weekly hours from Supplemental Nutrition Assistance Program work registration under the general work requirements.
 
 values:
   2015-10-01: 30
